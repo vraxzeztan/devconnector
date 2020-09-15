@@ -2,6 +2,7 @@ const express = require("express");
 const config = require("config");
 const router = express.Router();
 const auth = require("../../middleware/auth");
+const checkObjectId = require("../../middleware/checkObjectId");
 const { check, validationResult, body } = require("express-validator");
 const Profile = require("../../models/Profile");
 const User = require("../../models/User");
@@ -127,7 +128,7 @@ router.get("/", async (req, res) => {
 // @route    GET api/profile/user/:user_id
 // @desc     Get profile by user_id
 // @access   Public
-router.get("/user/:user_id", async (req, res) => {
+router.get("/user/:user_id", checkObjectId("id"), async (req, res) => {
     try {
         const profile = await Profile.findOne({
             user: user_id,

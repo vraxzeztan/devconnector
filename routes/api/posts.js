@@ -2,6 +2,7 @@ const express = require("express");
 const { check, validationResult } = require("express-validator");
 const router = express.Router();
 const auth = require("../../middleware/auth");
+const checkObjectID = require("../../middleware/checkObjectID");
 const Post = require("../../models/Post");
 const Profile = require("../../models/Profile");
 const User = require("../../models/User");
@@ -50,7 +51,7 @@ router.get("/", auth, async (req, res) => {
 // @route    GET api/posts/:id
 // @desc     Get post by id
 // @access   Private
-router.get("/:id", auth, async (req, res) => {
+router.get("/:id", [auth, checkObjectId("id")], async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         if (!post) {
@@ -59,9 +60,6 @@ router.get("/:id", auth, async (req, res) => {
         res.json(post);
     } catch (err) {
         console.error(err.message);
-        if (err.kind == "ObjectID") {
-            res.status(404).json({ msg: "Post not found" });
-        }
         res.status(500).send("Server Error");
     }
 });
@@ -69,7 +67,7 @@ router.get("/:id", auth, async (req, res) => {
 // @route    DELETE api/posts/:id
 // @desc     Delete post by id
 // @access   Private
-router.delete("/:id", auth, async (req, res) => {
+router.delete("/:id", [auth, checkObjectId("id")], async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         if (!post) {
@@ -83,9 +81,6 @@ router.delete("/:id", auth, async (req, res) => {
         res.json({ msg: "Post removed" });
     } catch (err) {
         console.error(err.message);
-        if (err.kind == "ObjectID") {
-            res.status(404).json({ msg: "Post not found" });
-        }
         res.status(500).send("Server Error");
     }
 });
@@ -93,7 +88,7 @@ router.delete("/:id", auth, async (req, res) => {
 // @route    PUT api/posts/like/:id
 // @desc     Like a post
 // @access   Private
-router.put("/like/:id", auth, async (req, res) => {
+router.put("/like/:id", [auth, checkObjectId("id")], async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
 
@@ -116,7 +111,7 @@ router.put("/like/:id", auth, async (req, res) => {
 // @route    PUT api/posts/unlike/:id
 // @desc     Unlike a post
 // @access   Private
-router.put("/unlike/:id", auth, async (req, res) => {
+router.put("/unlike/:id", [auth, checkObjectId("id")], async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
 
@@ -143,7 +138,11 @@ router.put("/unlike/:id", auth, async (req, res) => {
 // @access   Private
 router.post(
     "/comment/:id",
-    [auth, [check("text", "Text is required").not().isEmpty()]],
+    [
+        auth,
+        checkObjectID("id"),
+        [check("text", "Text is required").not().isEmpty()],
+    ],
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
