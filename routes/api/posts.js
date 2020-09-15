@@ -2,7 +2,7 @@ const express = require("express");
 const { check, validationResult } = require("express-validator");
 const router = express.Router();
 const auth = require("../../middleware/auth");
-const checkObjectID = require("../../middleware/checkObjectID");
+const checkObjectId = require("../../middleware/checkObjectId");
 const Post = require("../../models/Post");
 const Profile = require("../../models/Profile");
 const User = require("../../models/User");
@@ -140,7 +140,7 @@ router.post(
     "/comment/:id",
     [
         auth,
-        checkObjectID("id"),
+        checkObjectId("id"),
         [check("text", "Text is required").not().isEmpty()],
     ],
     async (req, res) => {
